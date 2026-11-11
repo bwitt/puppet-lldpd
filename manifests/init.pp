@@ -37,11 +37,15 @@ class lldpd (
             '/etc/apt/trusted.gpg.d/home_vbernat.gpg',
             '/etc/apt/trusted.gpg.d/home_vbernat.gpg~',
             '/usr/share/keyrings/lldpd.asc',
+            '/etc/apt/keyrings/lldpd',
           ]:
             ensure => absent,
         }
-        apt::key { 'EF795E4D26E48F1D7661267B431C37A97C3E114B':
-          ensure => 'absent',
+        # apt-key was removed in apt 3
+        unless $facts['os']['name'] == 'Ubuntu' and versioncmp($facts['os']['release']['full'], '26.04') >= 0 {
+          apt::key { 'EF795E4D26E48F1D7661267B431C37A97C3E114B':
+            ensure => 'absent',
+          }
         }
 
         # Configure source and key
@@ -50,7 +54,7 @@ class lldpd (
           release  => ' ',
           repos    => '/',
           key      => {
-            name    => 'lldpd',
+            name    => 'lldpd.asc',
             content => $apt_key,
           },
           require  => File['/usr/share/keyrings/lldpd.asc'],

@@ -23,7 +23,14 @@ describe 'lldpd' do
 
         if facts[:os]['family'] == 'Debian' && facts[:os]['release']['full'] != '18.04'
           it { is_expected.to contain_apt__source('lldpd') }
-          it { is_expected.to contain_apt__key('EF795E4D26E48F1D7661267B431C37A97C3E114B').with_ensure('absent') }
+          it { is_expected.to contain_apt__keyring('lldpd.asc') }
+          it { is_expected.to contain_file('/etc/apt/keyrings/lldpd').with_ensure('absent') }
+
+          if facts[:os]['name'] == 'Ubuntu' && facts[:os]['release']['major'].to_i >= 26
+            it { is_expected.not_to contain_apt_key('EF795E4D26E48F1D7661267B431C37A97C3E114B') }
+          else
+            it { is_expected.to contain_apt__key('EF795E4D26E48F1D7661267B431C37A97C3E114B').with_ensure('absent') }
+          end
           it { is_expected.to contain_file('/usr/share/keyrings/lldpd.asc') }
           it { is_expected.to contain_file('/etc/apt/trusted.gpg.d/home_vbernat.gpg').with_ensure('absent') }
           it { is_expected.to contain_file('/etc/apt/trusted.gpg.d/home_vbernat.gpg~').with_ensure('absent') }
